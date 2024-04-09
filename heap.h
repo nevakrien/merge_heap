@@ -8,10 +8,13 @@ points on style:
 1. the code uses macros and conditional compilation in order to compile for all 3 cases
    simply define the case correctly and using the defined names in your c code would call the functions
 
-2. static functions should not be used by the users of this code. they are only and implementation detail
+2. static functions should not be used by the users of this code. they are only an implementation detail
 
-3. the code would some times leave undfined memory temporerily and use unreachble 
-   in all cases this should be viewed as code comments and assertions of correctnes.
+3. the code would some times leave undfined memory temporerily and use restrict and unreachble 
+   in all cases this should be viewed as code comments and assertions of correctnes. 
+
+4. the code attempts to be as effishent as possible. there isnt really a place for SIMD or multi core work here
+   but what we can do is avoid alocating unecessery memory. this is especially relevent for the inplace_sort function
 
 */
 
@@ -310,7 +313,7 @@ int ordered_insert(Heap* h,rank_t rank,data_t data){
 }
 
 //we have restrict on everything here 
-//because the data storage here fundementaly can not be in the heap
+//because the data storage here fundementaly CANOT be in the h heap
 //it is an external buffer the caller alocated
 //you might think that if rank==data this introduces new db
 //however having 2 pointers of diffrent type pointing to the same object is allways ub
@@ -405,128 +408,169 @@ int pop_min(Heap* h,rank_t* restrict rank,data_t* restrict data){
 //sorting is a bounce but it seems fun so I am doing it anyway.
 //this can be paralalized if I took the time but it introduces a lot of syncing overhead so I elected to not do that
 
+//O(size)
 Heap get_end(Heap x,int size){
-	for(int i=0;i<size;i++){
-		if(x==NULL){
-			return NULL;
+	for(int i=0;i<size;i++){//O(size)
+		if(x==NULL){//size*O(1)
+			return NULL;//O(1)
 		}
-		x=x->next;
+		x=x->next;//size*O(1)
 	}
-	return x;
+	return x;//O(1)
 }
 
+//O(size)
 Heap* get_end_ref(Heap x,int size){
-	while(1){
-		size-=1;
-		if(size==0){
-			return &(x->next);
+	if(x==NULL || size==0){
+		UNREACHABLE();
+	}
+
+	while(1){//O(size)
+		size-=1;//size*O(1)
+		if(size==0){//size*O(1)
+			return &(x->next);//O(1)
 		}
-		if(x->next==NULL){
-			return &(x->next);
+		if(x->next==NULL){//size*O(1)
+			return &(x->next);//O(1)
 		}
-		x=x->next;
+		x=x->next;//size*O(1)
 	}
 }
 
-//I am avoiding making internal calls here because its very easy to get log(n) memory with these like mergesort does
-//we have a unique opretunaty here to be constant memory which I am gona go for 
-//you can verify its constant memory since we only alocate memory for each named stack varible (a constant size set)
-//the pattern I made is very similar to function calls its in the codeblock itself to avoid passing around stack pointers
-void inplace_sort(Heap *h){
-	int step=1;
-	Heap* cur_tail=h;
-		
-	Heap a=*h;
-	Heap end_a=get_end(a,step);
-	Heap b=end_a;
+//this algorithem is essentially merge sort with 1 major diffrence its constant memory
+//since we have linkedlists as our data structure we can merge in place without needing to alocate a new array
 
-	Heap* end_b_ref=get_end_ref(b,step); //passed by refrence so we can update the tail cheaper
-	Heap  end_b=*end_b_ref;
+//to put this in perspective quicksort is the leadning sorting algorithem because its O(log(n)) memory
+//so this algorithem is even more memory effishent and dosent have the worse case O(n^2) problem
+
+//I am avoiding making internal calls here because its very easy to get log(n) memory with these like quicksort does
+//you can verify its constant memory since we only alocate memory for each named stack varible (a constant size set)
+
+//the goto pattern I made is very similar to internal function calls its in the codeblock itself to avoid passing around stack pointers
+//its purely for making the code more readble. puting everything in a triple while loop would give the same result
+
+//O(nlog(n))
+void inplace_sort(Heap *h){
+	if(*h==NULL){
+		return;
+	}
+	//1<=step<=2n => O(step)=O(n) O(1/step)=O(1)
+	int step=1;//O(1)
+
+	//cur_tail is the curent end of the sorted stack.
+	Heap* cur_tail=h;//O(1)
+	//you will notice we use *cur_tail every time we push an item
+	
+	//a and b refer to the SUBLISTS 
+	Heap a=*h;//O(1)
+	Heap end_a=get_end(a,step);//O(1)
+	Heap b=end_a;//O(1)
+
+	Heap* end_b_ref=get_end_ref(b,step); //passed by refrence so we can update the tail cheaper //O(1)
+	Heap  end_b=*end_b_ref;//O(1)
 	
 	//loops untill the first sublist is the whole list (end_a=null)
-	while(1){
-		goto sort_for_step;
+	
+	while(1){//O(log2(n))
+		goto sort_for_step;//log2(n)*O(n)
 		end_sort_for_step:
 
-		step*=2;
+		step*=2;//log2(n)*O(1)
 
-		cur_tail=h;
-		a=*h;
-		end_a=get_end(a,step);
-		if(end_a==NULL){
-			break;
+		cur_tail=h;//log2(n)*O(1)
+		a=*h;//log2(n)*O(1)
+		end_a=get_end(a,step);//log2(n)*O(step)
+		if(end_a==NULL){//log2(n)*O(step)
+			break;//O(1)
 		}
-		b=end_a;
-		//end_b=get_end(b,step);
-		end_b_ref=get_end_ref(b,step);
-		end_b=*end_b_ref;
+		b=end_a;//log2(n)*O(1)
+		end_b_ref=get_end_ref(b,step);//log2(n)*O(step)=O(nlog2(n))
+		end_b=*end_b_ref;//log2(n)*O(1)
 	}
 	return;
 
+//O(n)=O(n/2step)*O(step)
 sort_for_step:
 	//merge all ordered sublists of length step (last sublist may be shorter)
 	
-	//loops untill the a sublist has no list to its left (ie end_a=)
-	while(1){
-		goto merge_heaps;
+	//loops untill the "a" sublist has no list to its left (ie end_a=null)
+	while(1){//O(n/2step)
+		goto merge_heaps;//O(n)=(n/2step)*O(step+step) 
 		end_merge_heaps:
 
-		a=end_b;
-		end_a=get_end(a,step);
-		if(end_a==NULL){
-			break;
+		a=end_b;//(n/2step)*O(1)=O(n)
+		end_a=get_end(a,step);//(n/2step)*O(1)=O(n)
+		if(end_a==NULL){//(n/2step)*O(1)=O(n)
+			break;//O(1)
 		}
 
-		b=end_a;
-		end_b_ref=get_end_ref(b,step);
-		end_b=*end_b_ref;
+		b=end_a;//(n/2step)*O(1)=O(n)
+		end_b_ref=get_end_ref(b,step);//(n/2step)*O(step)=O(n)
+		end_b=*end_b_ref;//(n/2step)*O(1)=O(n)
+
+		if(a==NULL || b==NULL || end_b_ref==NULL){
+			UNREACHABLE();
+		}
 	}
 
-	goto end_sort_for_step;
+	goto end_sort_for_step;//O(1)
 
+//O(a+b)
 merge_heaps:
 	//this block reorders *cur_tail->a..->b->end_b 	
 	//to *cur_tail->c0..->cn>end_b
+	//it also updates the cur_tail to point where the current tail is
 	
-	//loops untill the a or b subarray are empty (ie a==end_a or b==end_b)
-	while(1){
+	//loops untill the a or b sublist is empty (ie a==end_a or b==end_b)
+	while(1){//O(a+b)
 		
-		if(a->rank <= b->rank){
-			*cur_tail=a;
-			cur_tail=&((*cur_tail)->next); //steping so our tail reflects the end of the sorted stack
-			a=a->next;
+		if(a==b || cur_tail==NULL){
+			UNREACHABLE();
+		}
+
+		if(a->rank <= b->rank){//(a+b)*O(1)
+
+			//pop from "a" into our tail
+			*cur_tail=a;//a*O(1)
+			cur_tail=&((*cur_tail)->next); //a*O(1)
+			a=a->next;//a*O(1)
 			
-			if(a==end_a){
-				*cur_tail=b;
+			if(a==end_a){//a*O(1)
+				//put the rest of b in our tail
+
+				*cur_tail=b;//O(1)
 				//we saved the end of b already
-				cur_tail=end_b_ref;
+				cur_tail=end_b_ref;//O(1)
 				//we have prev_tail->...->end_a->..->last b [end_b_ref]->end_b
-				break;
+				break;//O(1)
 			}
 		}
 		else{
-			*cur_tail=b;
-			cur_tail=&((*cur_tail)->next);
-			b=b->next;
+			//pop from b into our tail
+			*cur_tail=b;//b*O(1)
+			cur_tail=&((*cur_tail)->next);//b*O(1)
+			b=b->next;//b*O(1)
 
-			if(b==end_b){
-				*cur_tail=a;
+			if(b==end_b){//b*O(1)
+				//put the rest of "a" in our tail
+
+				*cur_tail=a;//O(1)
 				
 				//since end_a was in the b heap we have put it into our sublist
 				//we have an inner loop prev_tail->...->end_a->..->a->..end_a
-				while(a->next!=end_a){
-					a=a->next;
+				while(a->next!=end_a){//O(a)
+					a=a->next;//a*O(1)
 				}
-				a->next=end_b;
+				a->next=end_b;//O(1)
 				//now we have reordered entry->a0..->am->an->b0...->bk->end_b 
 				//to entry->c0..->bk->am->...->an->end_b 
 				
-				cur_tail=&(a->next);
-				break;
+				cur_tail=&(a->next);//O(1)
+				break;//O(1)
 			}
 		}
 	}
 
-	goto end_merge_heaps;
+	goto end_merge_heaps;//O(1)
 }
 #endif //HEAP_H
