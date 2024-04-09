@@ -74,5 +74,15 @@ int main(){
 	
 	free_heap(a);
 
+	printf("\n\ntesting sort\n");
+	a= random_heap(16);
+	print_heap(a);
+	
+	printf("\nsorting\n");
+	inplace_sort(&a);
+	print_heap(a);
+
+	free_heap(a);
+
 	return 0;
 }
