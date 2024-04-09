@@ -415,6 +415,19 @@ Heap get_end(Heap x,int size){
 	return x;
 }
 
+Heap* get_end_ref(Heap x,int size){
+	while(1){
+		size-=1;
+		if(size==0){
+			return &(x->next);
+		}
+		if(x->next==NULL){
+			return &(x->next);
+		}
+		x=x->next;
+	}
+}
+
 //I am avoiding making internal calls here because its very easy to get log(n) memory with these like mergesort does
 //we have a unique opretunaty here to be constant memory which I am gona go for 
 //you can verify its constant memory since we only alocate memory for each named stack varible (a constant size set)
@@ -426,105 +439,94 @@ void inplace_sort(Heap *h){
 	Heap a=*h;
 	Heap end_a=get_end(a,step);
 	Heap b=end_a;
-	Heap end_b=get_end(b,step);
+
+	Heap* end_b_ref=get_end_ref(b,step); //passed by refrence so we can update the tail cheaper
+	Heap  end_b=*end_b_ref;
 	
-	while(end_a!=NULL){
+	//loops untill the first sublist is the whole list (end_a=null)
+	while(1){
 		goto sort_for_step;
 		end_sort_for_step:
-
-		// if(b==NULL){
-		// 	printf("b is NULL we should exit the loop\n");
-		// }
-
-		if (step>100){
-			exit(1);
-		}
-		// printf("after step %d we have\n",step);
-		// print_heap(*h);
 
 		step*=2;
 
 		cur_tail=h;
 		a=*h;
 		end_a=get_end(a,step);
+		if(end_a==NULL){
+			break;
+		}
 		b=end_a;
-		end_b=get_end(b,step);
+		//end_b=get_end(b,step);
+		end_b_ref=get_end_ref(b,step);
+		end_b=*end_b_ref;
 	}
-
 	return;
 
-	sort_for_step:
-		// printf("sort_for_step excuted our b is:\n");
-		// print_heap(b);
-		//merge all ordered sublists of length step (last sublist may be shorter)
-		while(b){
-			goto merge_heaps;
-			end_merge_heaps:
-			
-			//printf("merge done\n");
+sort_for_step:
+	//merge all ordered sublists of length step (last sublist may be shorter)
+	
+	//loops untill the a sublist has no list to its left (ie end_a=)
+	while(1){
+		goto merge_heaps;
+		end_merge_heaps:
 
-			a=end_b;
-			end_a=get_end(a,step);
-			b=end_a;
-			end_b=get_end(b,step);
+		a=end_b;
+		end_a=get_end(a,step);
+		if(end_a==NULL){
+			break;
 		}
 
-		goto end_sort_for_step;
+		b=end_a;
+		end_b_ref=get_end_ref(b,step);
+		end_b=*end_b_ref;
+	}
 
-	merge_heaps:
-		//this block reorders *cur_tail->a..->b->end_b 	
-		//to *cur_tail->c0..->cn>end_b
-		//printf("starting loop\n");
-		while(1){
+	goto end_sort_for_step;
+
+merge_heaps:
+	//this block reorders *cur_tail->a..->b->end_b 	
+	//to *cur_tail->c0..->cn>end_b
+	
+	//loops untill the a or b subarray are empty (ie a==end_a or b==end_b)
+	while(1){
+		
+		if(a->rank <= b->rank){
+			*cur_tail=a;
+			cur_tail=&((*cur_tail)->next); //steping so our tail reflects the end of the sorted stack
+			a=a->next;
 			
-			if(a->rank <= b->rank){
-				*cur_tail=a;
-				cur_tail=&((*cur_tail)->next); //steping so our tail reflects the end of the sorted stack
-				a=a->next;
-				
-				if(a==end_a){
-					//printf("breaking a\n");
-
-					*cur_tail=b;
-					//wrong //cur_tail=&((*cur_tail)->next);
-					//a=end_b;
-					//printf("our b is:"); print_heap(b);
-					while(b->next!=end_b){
-						// printf("our b is:"); print_heap(b);
-						b=b->next;
-					}
-					//we have end_b as our end
-					cur_tail=&(b->next);
-					break;
-				}
-			}
-			else{
+			if(a==end_a){
 				*cur_tail=b;
-				cur_tail=&((*cur_tail)->next);
-				b=b->next;
-
-				if(b==end_b){
-					//printf("breaking b\n");
-
-					*cur_tail=a;
-					//wrong //cur_tail=&((*cur_tail)->next);
-					
-					//since end_a was in the b heap we put it into out stack
-					//we have an inner loop prev_tail->...->end_a->..->a->..end_a
-					while(a->next!=end_a){
-						a=a->next;
-					}
-					a->next=end_b;
-					//now we have reordered entry->a0..->am->an->b0...->bk->end_b 
-					//to entry->c0..->bk->am->...->an->end_b 
-					
-					cur_tail=&(a->next);
-					//a=end_b;
-					break;
-				}
+				//we saved the end of b already
+				cur_tail=end_b_ref;
+				//we have prev_tail->...->end_a->..->last b [end_b_ref]->end_b
+				break;
 			}
 		}
+		else{
+			*cur_tail=b;
+			cur_tail=&((*cur_tail)->next);
+			b=b->next;
 
-		goto end_merge_heaps;
+			if(b==end_b){
+				*cur_tail=a;
+				
+				//since end_a was in the b heap we have put it into our sublist
+				//we have an inner loop prev_tail->...->end_a->..->a->..end_a
+				while(a->next!=end_a){
+					a=a->next;
+				}
+				a->next=end_b;
+				//now we have reordered entry->a0..->am->an->b0...->bk->end_b 
+				//to entry->c0..->bk->am->...->an->end_b 
+				
+				cur_tail=&(a->next);
+				break;
+			}
+		}
+	}
+
+	goto end_merge_heaps;
 }
 #endif //HEAP_H
