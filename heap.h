@@ -429,39 +429,33 @@ void inplace_sort(Heap *h){
 	Heap end_b=get_end(b,step);
 	
 	while(end_a!=NULL){
+		goto sort_for_step;
+		end_sort_for_step:
+
+		// if(b==NULL){
+		// 	printf("b is NULL we should exit the loop\n");
+		// }
+
+		if (step>100){
+			exit(1);
+		}
+		// printf("after step %d we have\n",step);
+		// print_heap(*h);
+
+		step*=2;
+
 		cur_tail=h;
 		a=*h;
 		end_a=get_end(a,step);
 		b=end_a;
 		end_b=get_end(b,step);
-
-		goto sort_for_step;
-		end_sort_for_step:
-
-		if(b!=end_a){
-			printf("sort_for_step had ub\n");
-			exit(1);
-		}
-
-		if(b==NULL){
-			printf("b is NULL we should exit the loop\n");
-		}
-
-		//exit(1);
-		if (step>100){
-			exit(1);
-		}
-		printf("after step %d we have\n",step);
-		print_heap(*h);
-
-		step*=2;
 	}
 
 	return;
 
 	sort_for_step:
-		printf("sort_for_step excuted our b is:\n");
-		print_heap(b);
+		// printf("sort_for_step excuted our b is:\n");
+		// print_heap(b);
 		//merge all ordered sublists of length step (last sublist may be shorter)
 		while(b){
 			goto merge_heaps;
