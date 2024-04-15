@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifdef _WIN32
-#include <errno.h>
-#endif
+// #ifdef _WIN32
+// #include <errno.h>
+// #endif
 
 #define TYPES_FOR_DATA
 typedef char* data_t ;
@@ -23,7 +23,7 @@ void print_data(data_t x){printf("%s",x);}
 
 
 long int load_file_to_memory(const char *filename, char **ans) {
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "rb");
     if (file == NULL) {
         perror("Error opening file\n");
         return -1;
@@ -59,34 +59,6 @@ long int load_file_to_memory(const char *filename, char **ans) {
     // Read the file from the beginning
     rewind(file);
 
-    #ifdef _WIN32 //windows does file sizes super weird
-    errno=0;
-    long int r=fread(*ans, 1, size, file);
-    if (errno != 0) {
-        if (errno == EIO) {
-            printf("An I/O error occurred.\n");
-        } else if (errno == ENOMEM) {
-            printf("Not enough memory.\n");
-        } else if (errno == EINVAL) {
-            printf("Invalid argument.\n");
-        } else {
-            printf("An unspecified error occurred.\n");
-        }
-
-        free(*ans);
-        fclose(file);
-        fputs("Error reading file\n", stderr);
-        return -1;
-    }
-
-    // Set the null terminator if needed
-    if (need_extra_byte) {
-        (*ans)[size] = '\0';
-    }
-    fclose(file);//close the file
-    return r;
-
-    #else
     if (fread(*ans, 1, size, file) != size) {
         free(*ans);
         fclose(file);
@@ -101,7 +73,6 @@ long int load_file_to_memory(const char *filename, char **ans) {
     fclose(file);//close the file
     return size + need_extra_byte;  // Return the size of the file
 
-    #endif//_WIN32
 }
 
 //modifies the input
@@ -109,15 +80,20 @@ Heap split_lines_noalloc(char* str,long int size){
     Heap head=NULL;
     //printf("string is: %s\n",str);
     while(size>0){
-        //printf("pre loop substirng %s\n",str);
+        printf("pre loop substirng %s\n",str);
         char *end=str;
         while(*end!='\n' && *end!='\0'){
-            //printf("seeing: <%c>\n",*end);
+            printf("seeing: <%c>\n",*end);
+            #ifdef _WIN32
+            if(*end=='\r'){
+                *end='\0';
+            }
+            #endif
             end++;
         }
         
         *end='\0'; //making a null terminator
-        //printf("substirng %s\n",str);
+        printf("substirng %s\n",str);
         long int len=1+(end-str);
 
         //inserting
