@@ -6,11 +6,6 @@ int main() {
 
     char *file_content;
     const char *filename = "example.txt";
-    
-    //test print
-    Heap test=NULL;
-    unordered_insert(&test,sizeof(filename),filename);
-    print_heap(test);
 
 
     long int result = load_file_to_memory(filename, &file_content);
@@ -21,7 +16,14 @@ int main() {
     printf("File content (size %ld):\n%s\n", result, file_content);
 
     Heap ans=split_lines_noalloc(file_content,result);
+    if(self_alocate_data_t(ans)){
+        printf("self alocation failed");
+        return 1;
+    }
+    free(file_content);
+
     print_heap(ans);
+    free_heap_full(ans);
 
     return 0;
 }

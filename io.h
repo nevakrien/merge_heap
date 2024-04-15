@@ -65,9 +65,8 @@ long int load_file_to_memory(const char *filename, char **ans) {
     if (need_extra_byte) {
         (*ans)[size] = '\0';
     }
-
-    //fclose(file);  // Close the file
-    return size + need_extra_byte;  // Return the size of the file, not counting the extra null terminator
+    fclose(file);//close the file
+    return size + need_extra_byte;  // Return the size of the file
 }
 
 //modifies the input
@@ -107,7 +106,11 @@ int self_alocate_data_t(Heap head){
         if(!clone_data){
             goto exit_error;
         }
-        strcpy(clone_data,tail->data);
+
+        //strcpy(clone_data,tail->data);
+        memcpy(clone_data,tail->data,tail->rank);
+        tail->data=clone_data;
+        tail=tail->next;
     }
 
     return 0;
@@ -121,5 +124,15 @@ exit_error:
     free_heap(head);
     return 1;
 }
+
+void free_heap_full(Heap x){
+    while(x){
+        free(x->data);
+        Heap temp =x->next;
+        free(x);
+        x=temp;
+    }
+}
+
 
 #endif //IO_H
