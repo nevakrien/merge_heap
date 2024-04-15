@@ -28,7 +28,7 @@ points on style:
 //specifcly knows the brench is impossible in realease builds and would optimize it away.
 //its used as both a code comment and a way to optimize since the compiler can now plan for it
 
-#define CHECK_UNREACHABLE
+// #define CHECK_UNREACHABLE
 
 #if defined(CHECK_UNREACHABLE)
 #include <assert.h>
@@ -39,16 +39,23 @@ points on style:
 #define UNREACHABLE() __assume(0)
 #else
 //null pointer derefrence to signal unreachbilety
-#define UNREACHABLE() (*(volatile int*)0 = 0)
+#define UNREACHABLE() (*(int*)0 = 0)
 #endif
 
 
 
-typedef void* data_t ;
-typedef int  rank_t;
 
-void print_rank(rank_t x){printf("%d",x);}
+//alowinng the user the option to have their own types
+#ifndef TYPES_FOR_DATA
+#define TYPES_FOR_DATA
+
+typedef void* data_t ;
+typedef long  rank_t;
+
+void print_rank(rank_t x){printf("%ld",x);}
 void print_data(data_t x){printf("%p",x);}
+
+#endif //TYPES_FOR_DATA
 
 struct Node {
 	rank_t rank;
@@ -58,6 +65,7 @@ struct Node {
 
 typedef struct Node* Heap;
 
+struct Node ERROR_NODE=(struct Node){0}; //we use this adress to signal errors
 
 //O(n)
 void print_heap(Heap x){
@@ -226,13 +234,16 @@ Heap clone_merge_ordered(Heap a,Heap b){
 	if(a){//O(1)
 		a=unsafe_clone_heap(a);//O(a)
 		if(!a){//O(1)
-			exit(1);//O(1)
+			return &ERROR_NODE;//exit(1);//O(1)
 		}
 	}
 	if(b){//O(1)
 		b=unsafe_clone_heap(b);//O(b)
 		if(!b){//O(1)
-			exit(1);//O(1)
+			if(a){//O(1)
+				free_heap(a);//O(a)
+			}
+			return &ERROR_NODE;//exit(1);//O(1)
 		}
 	}
 	//since we JUST cloned both lists we know for a fact the clones have no overlap
@@ -271,13 +282,16 @@ Heap clone_merge_unordered(Heap a,Heap b){
 	if(a){//O(1)
 		a=unsafe_clone_heap(a);//O(a)
 		if(!a){//O(1)
-			exit(1);//O(1)
+			return &ERROR_NODE;//exit(1);//O(1)
 		}
 	}
 	if(b){//O(1)
 		b=unsafe_clone_heap(b);//O(b)
 		if(!b){//O(1)
-			exit(1);//O(1)
+			if(a){//O(1)
+				free_heap(a);//O(a)
+			}
+			return &ERROR_NODE;//exit(1);//O(1)
 		}
 	}
 	//since we JUST cloned both lists we know for a fact the clones have no overlap

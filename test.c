@@ -21,7 +21,7 @@ Heap range(int lim){
 Heap random_heap(int lim){
 	Heap ans = MAKE_HEAP();
 	for(int i=0;i<lim;i++){
-		unordered_insert(&ans,random_num()%10,canary);
+		unordered_insert(&ans,(random_num()%20)-10,canary);
 	}
 	return ans;
 }
@@ -66,11 +66,11 @@ int main(){
 	
 	print_heap(a);	
 	pop_min(&a,&rank,&data);
-	printf("our min key we poped is%d\n",rank);
+	printf("our min key we poped is%ld\n",rank);
 
 	print_heap(a);	
 	get_min(a,&rank,&data);
-	printf("our min key is %d\n",rank);
+	printf("our min key is %ld\n",rank);
 	
 	free_heap(a);
 
