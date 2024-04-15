@@ -98,7 +98,7 @@ Heap split_lines_noalloc(char* str,long int size){
     return head;
 }
 
-//frees on fail
+//frees head on fail
 int self_alocate_data_t(Heap head){
     Heap tail=head;
     while(tail){
