@@ -6,6 +6,7 @@ int main() {
 
     char *file_content;
     const char *filename = "example.txt";
+    const char *outfilename = "output.txt";
 
 
     long int result = load_file_to_memory(filename, &file_content);
@@ -16,10 +17,19 @@ int main() {
     printf("File content (size %ld):\n%s\n", result, file_content);
 
     Heap ans=split_lines_noalloc(file_content,result);
-    if(self_alocate_data_t(ans)){
-        printf("self alocation failed");
+    fflush(stdout);
+    
+    if(dump_heap(ans,outfilename)){
+        printf("error dumping heap\n");
         return 1;
     }
+
+    if(self_alocate_data_t(ans)){
+        printf("self alocation failed\n");
+        return 1;
+    }
+
+
     free(file_content);
 
     print_heap(ans);

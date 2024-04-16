@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-// #ifdef _WIN32
-// #include <errno.h>
-// #endif
 
 #define TYPES_FOR_DATA
 typedef char* data_t ;
@@ -80,10 +77,10 @@ Heap split_lines_noalloc(char* str,long int size){
     Heap head=NULL;
     //printf("string is: %s\n",str);
     while(size>0){
-        printf("pre loop substirng %s\n",str);
+        //printf("pre loop substirng %s\n",str);
         char *end=str;
         while(*end!='\n' && *end!='\0'){
-            printf("seeing: <%c>\n",*end);
+            //printf("seeing: <%c>\n",*end);
             #ifdef _WIN32
             if(*end=='\r'){
                 *end='\0';
@@ -93,7 +90,7 @@ Heap split_lines_noalloc(char* str,long int size){
         }
         
         *end='\0'; //making a null terminator
-        printf("substirng %s\n",str);
+        //printf("substirng %s\n",str);
         long int len=1+(end-str);
 
         //inserting
@@ -145,5 +142,40 @@ void free_heap_full(Heap x){
     }
 }
 
+#ifdef _WIN32
+const char* terminator="\r\n";
+const char terlen=2;
+#else
+const char* terminator="\n";
+const char terlen=1;
+#endif
+
+int dump_heap(Heap h,const char *filename){
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file\n");
+        return 1;
+    }
+
+    while(h){
+        long size=h->rank-terlen;
+        if(fwrite(h->data,1,size,file)!=size){
+            goto exit_write_error;
+        }
+        if(fwrite(terminator,1,terlen,file)!=terlen){
+            goto exit_write_error;
+        }
+        h=h->next;
+    }
+
+    fclose(file);
+    return 0;
+
+    exit_write_error:
+        perror("Error writing to file\n");
+        fclose(file);
+        remove(filename);
+        return 1;
+}
 
 #endif //IO_H
