@@ -142,13 +142,13 @@ void free_heap_full(Heap x){
     }
 }
 
-#ifdef _WIN32
-const char* terminator="\r\n";
-const char terlen=2;
-#else
+// #ifdef _WIN32
+// const char* terminator="\r\n";
+// const char terlen=2;
+// #else
 const char* terminator="\n";
 const char terlen=1;
-#endif
+// #endif
 
 int dump_heap(Heap h,const char *filename){
     FILE *file = fopen(filename, "wb");
