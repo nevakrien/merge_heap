@@ -256,15 +256,21 @@ int main() {
 	    	if(tok2==NULL){
 	    		goto badargs;
 	    	}
+	    	if(tok3==NULL){
+	    		tok3=tok2;
+	    	}
+
+	    	if(get_heap(tok3)!=NULL){
+	    		printf("heap by that name already exists\n");
+	    		continue;
+	    	}
 
 	    	Heap ans=load_from_file(tok2);
 	    	if(ans==&ERROR_NODE){
 	    		continue;
 	    	}
 
-	    	if(tok3==NULL){
-	    		tok3=tok2;
-	    	}
+	    	
 
 	    	addHeap(ans,0,tok3);
 	    }
@@ -376,6 +382,11 @@ int main() {
 
 	    	if(tok2==NULL || tok3==NULL || tok4==NULL){
 	    		goto badargs;
+	    	}
+
+	    	if(get_heap(tok4)!=NULL){
+	    		printf("a heap by that name already exists\n");
+	    		continue;
 	    	}
 
 	    	struct UserHeap* a=get_heap(tok2);
