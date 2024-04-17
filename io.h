@@ -158,7 +158,7 @@ int dump_heap(Heap h,const char *filename){
     }
 
     while(h){
-        long size=strlen(h->data)+1-terlen;
+        long size=strlen(h->data);//+1-terlen;
         if(fwrite(h->data,1,size,file)!=size){
             goto exit_write_error;
         }
