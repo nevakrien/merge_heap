@@ -142,15 +142,43 @@ void free_heap_full(Heap x){
     }
 }
 
-// #ifdef _WIN32
-// const char* terminator="\r\n";
-// const char terlen=2;
-// #else
+#ifdef _WIN32
+const char* terminator="\r\n";
+const char terlen=2;
+#else
 const char* terminator="\n";
 const char terlen=1;
-// #endif
+#endif
 
 int dump_heap(Heap h,const char *filename){
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file\n");
+        return 1;
+    }
+
+    while(h){
+        long size=strlen(h->data)+1-terlen;
+        if(fwrite(h->data,1,size,file)!=size){
+            goto exit_write_error;
+        }
+        if(fwrite(terminator,1,terlen,file)!=terlen){
+            goto exit_write_error;
+        }
+        h=h->next;
+    }
+
+    fclose(file);
+    return 0;
+
+    exit_write_error:
+        perror("Error writing to file\n");
+        fclose(file);
+        remove(filename);
+        return 1;
+}
+
+int dump_heap_trusted(Heap h,const char *filename){
     FILE *file = fopen(filename, "wb");
     if (file == NULL) {
         perror("Error opening file\n");
