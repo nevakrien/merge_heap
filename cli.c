@@ -10,6 +10,8 @@ char input[MAX_INPUT_LENGTH];
 char *tok1;
 char *tok2;
 char *tok3;
+char *tok4;
+
 const char *delim = " "; 
 
 int sanitize(char *str) {
@@ -112,6 +114,7 @@ int remove_heap(char* name){
 
 int main() {
 	while(1){
+		show_state();
 		printf("Enter command: \n");
     
 	    if (fgets(input, MAX_INPUT_LENGTH, stdin) == NULL) {
@@ -134,8 +137,25 @@ int main() {
 
 	    //printf("\nDebug: tok1 = '%s'\n", tok1);
 
-	    if(strcmp(tok1,"show")==0){//prints state
-	    	show_state();
+	    if(strcmp(tok1,"show")==0){//prints heap
+	    	tok2 = strtok(NULL, delim); //name
+	    	if(tok2==NULL){
+	    		goto badargs;
+	    	}
+
+	    	struct UserHeap* uh=get_heap(tok2);
+	    	if(uh==NULL){
+	    		printf("heap dosent exists\n");
+	    		continue;
+	    	}
+
+	    	if(uh->sorted){
+	    		printf("[sorted]\n");
+	    	}
+	    	else{
+	    		printf("[not sorted]\n");
+	    	}
+	    	print_heap(uh->h);
 	    }
 
 	    else if(strcmp(tok1,"load")==0){//loads file into heap
@@ -154,8 +174,12 @@ int main() {
 	    		goto badargs;
 	    	}
 
-	    	int sorted;
+	    	if(get_heap(tok2)!=NULL){
+	    		printf("heap by that name already exists\n");
+	    		continue;
+	    	}
 
+	    	int sorted;
 	    	if(tok3==NULL){
 	    		sorted=1;
 	    	}
@@ -207,6 +231,33 @@ int main() {
 	    }
 
 	    else if(strcmp(tok1,"insert")==0){//inserts to a heap (if sorted keeps it sorted)
+	    	tok2 = strtok(NULL, delim); //name
+	    	tok3 = strtok(NULL, delim); //rank
+	    	tok4 = strtok(NULL, delim); //data
+
+	    	if(tok2==NULL || tok3==NULL || tok4==NULL){
+	    		goto badargs;
+	    	}
+
+	    	rank_t rank;
+	    	if(parse_int(tok3,&rank)){
+	    		printf("3d not an int\n");
+	    		goto badargs;
+	    	}
+
+	    	struct UserHeap* uh=get_heap(tok2);
+	    	if(uh==NULL){
+	    		printf("heap dosent exists\n");
+	    		continue;
+	    	}
+
+	    	if(uh->sorted){
+	    		if(ordered_insert(&uh->h,rank,tok4)){goto memory_error;};
+	    	}
+	    	else{
+	    		if(unordered_insert(&uh->h,rank,tok4)){goto memory_error;};
+	    	}
+
 
 	    }
 
@@ -230,8 +281,14 @@ int main() {
 
 	    badargs:
 	    	printf("command miss shaped\n");
+	    	continue;
+
+	    memory_error:
+	    	printf("could not alocate memory\n");
+	    	return 1;
 
 	}
+	
 
 	return 1;
 }

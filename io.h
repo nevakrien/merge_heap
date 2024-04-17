@@ -184,41 +184,42 @@ int dump_heap(Heap h,const char *filename){
 //  * @param out A pointer to an integer where the parsed value will be stored.
 //  * @return 0 on success, 1 on error.
 //  */
-// int parse_int(const char *str, int *out) {
-//     char *end;
-//     if (str == NULL) {
-//         return 1; // Null string pointer is an error
-//     }
+#include <ctype.h>
+int parse_int(const char *str, rank_t *out) {
+    char *end;
+    if (str == NULL) {
+        return 1; // Null string pointer is an error
+    }
 
-//     // Handle empty string
-//     if (*str == '\0') {
-//         return 1;
-//     }
+    // Handle empty string
+    if (*str == '\0') {
+        return 1;
+    }
 
-//     // Convert string to long using strtol
-//     long result = strtol(str, &end, 10); // Base 10
+    // Convert string to long using strtol
+    long result = strtol(str, &end, 10); // Base 10
 
-//     // Check if the conversion was successful
-//     if (end == str) {
-//         return 1; // No digits were found
-//     }
+    // Check if the conversion was successful
+    if (end == str) {
+        return 1; // No digits were found
+    }
 
-//     // Check for any remaining characters after the number
-//     while (*end != '\0') {
-//         if (!isspace((unsigned char)*end)) {
-//             return 1; // Additional non-whitespace characters found
-//         }
-//         end++;
-//     }
+    // Check for any remaining characters after the number
+    while (*end != '\0') {
+        if (!isspace((unsigned char)*end)) {
+            return 1; // Additional non-whitespace characters found
+        }
+        end++;
+    }
 
-//     // Check if the value is out of the int range
-//     if (result > INT_MAX || result < INT_MIN) {
-//         return 1; // Result is out of the range of an int
-//     }
+    // // Check if the value is out of the int range
+    // if (result > INT_MAX || result < INT_MIN) {
+    //     return 1; // Result is out of the range of an int
+    // }
 
-//     // Successful conversion
-//     *out = (int)result;
-//     return 0;
-// }
+    // Successful conversion
+    *out = (int)result;
+    return 0;
+}
 
 #endif //IO_H
