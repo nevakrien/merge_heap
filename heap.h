@@ -1,5 +1,5 @@
 /*
-desgin choice:
+design choice:
 1. we are using a single header mainly for simplicity. the code is so short
 
 
@@ -10,11 +10,11 @@ points on style:
 
 2. static functions should not be used by the users of this code. they are only an implementation detail
 
-3. the code would some times leave undfined memory temporerily and use restrict and unreachble 
-   in all cases this should be viewed as code comments and assertions of correctnes. 
+3. the code would some times leave undefined memory temporarily and use restrict and unreachable 
+   in all cases this should be viewed as code comments and assertions of correctness. 
 
-4. the code attempts to be as effishent as possible. there isnt really a place for SIMD or multi core work here
-   but what we can do is avoid alocating unecessery memory. this is especially relevent for the inplace_sort function
+4. the code attempts to be as efficient as possible. there isnt really a place for SIMD or multi core work here
+   but what we can do is avoid allocating unnecessary memory. this is especially relevant for the inplace_sort function
 
 */
 
@@ -24,8 +24,8 @@ points on style:
 #include <stdio.h>
 #include <stdlib.h>
 
-//key point UNREACHABLE and the if statments runing it are actually never excuted... the compiler
-//specifcly knows the brench is impossible in realease builds and would optimize it away.
+//key point UNREACHABLE and the if statements running it are actually never executed... the compiler
+//specifically knows the branch is impossible in release builds and would optimize it away.
 //its used as both a code comment and a way to optimize since the compiler can now plan for it
 
 // #define CHECK_UNREACHABLE
@@ -38,14 +38,14 @@ points on style:
 #elif defined(_MSC_VER)
 #define UNREACHABLE() __assume(0)
 #else
-//null pointer derefrence to signal unreachbilety
+//null pointer dereference to signal unreachability
 #define UNREACHABLE() (*(int*)0 = 0)
 #endif
 
 
 
 
-//alowinng the user the option to have their own types
+//allowing the user the option to have their own types
 #ifndef TYPES_FOR_DATA
 #define TYPES_FOR_DATA
 
@@ -65,7 +65,7 @@ struct Node {
 
 typedef struct Node* Heap;
 
-struct Node ERROR_NODE=(struct Node){0}; //we use this adress to signal errors
+struct Node ERROR_NODE=(struct Node){0}; //we use this address to signal errors
 
 //O(n)
 void print_heap(Heap x){
@@ -97,7 +97,7 @@ static struct Node* unsafe_clone_node(struct Node* node){
 
 	cur->rank=node->rank;//O(1)
 	cur->data=node->data;//O(1)
-	//no need for setting next thats on the caller
+	//no need for setting next that's on the caller
 	return cur;
 }
 
@@ -133,12 +133,12 @@ static Heap unsafe_clone_heap(Heap x){
 		cur->next=unsafe_clone_node(x);//O(1)*(n-1)
 		cur=cur->next;//O(1)*(n-1)
 		if(!cur){//O(1)*(n-1)
-			//this code excutes at most once
-			free_heap(ans);//O(n) or 0 if never excuted
-			return (Heap){NULL};//O(1) or 0 if never excuted
+			//this code executes at most once
+			free_heap(ans);//O(n) or 0 if never executed
+			return (Heap){NULL};//O(1) or 0 if never executed
 		} 
 	}
-	//now we do need to set that undfined memory. 
+	//now we do need to set that undefined memory. 
 	cur->next=NULL; //O(1)
 	
 	return ans;//O(1)
@@ -148,7 +148,7 @@ static Heap unsafe_clone_heap(Heap x){
 
 #define UNION clone_merge_ordered //clone_merge_unordered
 #define INSERT unordered_insert //ordered_insert
-#define MNIMUM peak //get_min
+#define MINIMUM peak //get_min
 #define EXTRACT_MIN pop //pop_min
 
 //O(a+b)
@@ -187,7 +187,7 @@ Heap unsafe_merge_ordered(Heap a, Heap b){
 	Heap cur=ans;//O(1)
 	//we will have ans->x->...->cur->random_stuff where ans..cur is ordered
 	//right now we have ans->random_stuff and its the smallest
-	//this will stay the case as we keep poping the smallest element
+	//this will stay the case as we keep popping the smallest element
 	//this is pretty much the merge function from merge sort
 
 
@@ -195,7 +195,7 @@ Heap unsafe_merge_ordered(Heap a, Heap b){
 	while(1){//O(a+b) times
 		
 		if(cur==b || cur==a){
-			//no self refrence for either
+			//no self reference for either
 			UNREACHABLE();
 		}
 
@@ -267,7 +267,7 @@ Heap unsafe_merge_unordered(Heap a, Heap b){
 	}
 	a->next=b;//O(1)
 	
-	if(a==b){//no self refrence
+	if(a==b){//no self reference
 		UNREACHABLE();
 	}
 
@@ -276,7 +276,7 @@ Heap unsafe_merge_unordered(Heap a, Heap b){
 
 //O(a+b)
 Heap clone_merge_unordered(Heap a,Heap b){
-	//returns a newly alocated Heap with the last element of a pointing to the first of b
+	//returns a newly allocated Heap with the last element of a pointing to the first of b
 
 
 	if(a){//O(1)
@@ -327,11 +327,11 @@ int ordered_insert(Heap* h,rank_t rank,data_t data){
 }
 
 //we have restrict on everything here 
-//because the data storage here fundementaly CANOT be in the h heap
-//it is an external buffer the caller alocated
+//because the data storage here fundamentally CANNOT be in the h heap
+//it is an external buffer the caller allocated
 //you might think that if rank==data this introduces new db
-//however having 2 pointers of diffrent type pointing to the same object is allways ub
-//so as long as the caller didnt introduce ub we are not introducing ub
+//however having 2 pointers of different type pointing to the same object is always ub
+//so as long as the caller didn't introduce ub we are not introducing ub
 
 //O(1)
 int peak(Heap h,rank_t* restrict rank,data_t* restrict data){
@@ -355,7 +355,7 @@ int pop(Heap* h,rank_t* restrict rank,data_t* restrict data){
 	*rank=(*h)->rank;//O(1)
 	*data=(*h)->data;//O(1)
 	
-	//freeing and modifiying
+	//freeing and modifying
 	Heap temp=(*h)->next;//O(1)
 	free(*h);//O(1)
 	*h=temp;//O(1)
@@ -420,7 +420,7 @@ int pop_min(Heap* h,rank_t* restrict rank,data_t* restrict data){
 }
 
 //sorting is a bounce but it seems fun so I am doing it anyway.
-//this can be paralalized if I took the time but it introduces a lot of syncing overhead so I elected to not do that
+//this can be parallelized if I took the time but it introduces a lot of syncing overhead so I elected to not do that
 
 //O(size)
 Heap get_end(Heap x,int size){
@@ -451,17 +451,17 @@ Heap* get_end_ref(Heap x,int size){
 	}
 }
 
-//this algorithem is essentially merge sort with 1 major diffrence its constant memory
-//since we have linkedlists as our data structure we can merge in place without needing to alocate a new array
+//this algorithm is essentially merge sort with 1 major difference its constant memory
+//since we have linkedlists as our data structure we can merge in place without needing to allocate a new array
 
-//to put this in perspective quicksort is the leadning sorting algorithem because its O(log(n)) memory
-//so this algorithem is even more memory effishent and dosent have the worse case O(n^2) problem
+//to put this in perspective quicksort is the leading sorting algorithm because its O(log(n)) memory
+//so this algorithm is even more memory efficient and doesn't have the worse case O(n^2) problem
 
 //I am avoiding making internal calls here because its very easy to get log(n) memory with these like quicksort does
-//you can verify its constant memory since we only alocate memory for each named stack varible (a constant size set)
+//you can verify its constant memory since we only allocate memory for each named stack variable (a constant size set)
 
 //the goto pattern I made is very similar to internal function calls its in the codeblock itself to avoid passing around stack pointers
-//its purely for making the code more readble. puting everything in a triple while loop would give the same result
+//its purely for making the code more readable. putting everything in a triple while loop would give the same result
 
 //O(nlog(n))
 void inplace_sort(Heap *h){
@@ -471,7 +471,7 @@ void inplace_sort(Heap *h){
 	//1<=step<=2n => O(step)=O(n) O(1/step)=O(1)
 	int step=1;//O(1)
 
-	//cur_tail is the curent end of the sorted stack.
+	//cur_tail is the current end of the sorted stack.
 	Heap* cur_tail=h;//O(1)
 	//you will notice we use *cur_tail every time we push an item
 	
@@ -480,10 +480,10 @@ void inplace_sort(Heap *h){
 	Heap end_a=get_end(a,step);//O(1)
 	Heap b=end_a;//O(1)
 
-	Heap* end_b_ref=get_end_ref(b,step); //passed by refrence so we can update the tail cheaper //O(1)
+	Heap* end_b_ref=get_end_ref(b,step); //passed by reference so we can update the tail cheaper //O(1)
 	Heap  end_b=*end_b_ref;//O(1)
 	
-	//loops untill the first sublist is the whole list (end_a=null)
+	//loops until the first sublist is the whole list (end_a=null)
 	
 	while(1){//O(log2(n))
 		goto sort_for_step;//log2(n)*O(n)
@@ -508,7 +508,7 @@ void inplace_sort(Heap *h){
 sort_for_step:
 	//merge all ordered sublists of length step (last sublist may be shorter)
 	
-	//loops untill the "a" sublist has no list to its left (ie end_a=null)
+	//loops until the "a" sublist has no list to its left (ie end_a=null)
 	while(1){//O(n/2step)
 		goto merge_heaps;//O(n)=(n/2step)*O(step+step) 
 		end_merge_heaps:
@@ -537,7 +537,7 @@ merge_heaps:
 	//to *cur_tail->c0..->cn->end_b
 	//it also updates the cur_tail to point where the current tail is
 	
-	//loops untill the a or b sublist is empty (ie a==end_a or b==end_b)
+	//loops until the a or b sublist is empty (ie a==end_a or b==end_b)
 	while(1){//O(a+b)
 		
 		if(a==b || cur_tail==NULL){

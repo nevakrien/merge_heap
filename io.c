@@ -24,8 +24,8 @@ int main() {
         return 1;
     }
 
-    if(self_alocate_data_t(ans)){
-        printf("self alocation failed\n");
+    if(self_allocate_data_t(ans)){
+        printf("self allocation failed\n");
         return 1;
     }
 

@@ -36,7 +36,7 @@ Heap random_ordered_heap(int lim){
 }
 
 int main(){
-	printf("\n\nchecking printing and basic alocation\n");
+	printf("\n\nchecking printing and basic allocation\n");
 	Heap a = MAKE_HEAP();
 	for(int i=0;i<3;i++){
 		print_heap(a);

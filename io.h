@@ -77,7 +77,7 @@ Heap split_lines_noalloc(char* str,long int size){
     Heap head=NULL;
     //printf("string is: %s\n",str);
     while(size>0){
-        //printf("pre loop substirng %s\n",str);
+        //printf("pre loop substring %s\n",str);
         char *end=str;
         while(*end!='\n' && *end!='\0'){
             //printf("seeing: <%c>\n",*end);
@@ -90,7 +90,7 @@ Heap split_lines_noalloc(char* str,long int size){
         }
         
         *end='\0'; //making a null terminator
-        //printf("substirng %s\n",str);
+        //printf("substring %s\n",str);
         long int len=1+(end-str);
 
         //inserting
@@ -107,7 +107,7 @@ Heap split_lines_noalloc(char* str,long int size){
 }
 
 //frees head on fail
-int self_alocate_data_t(Heap head){
+int self_allocate_data_t(Heap head){
     Heap tail=head;
     while(tail){
         char* clone_data=malloc(tail->rank);

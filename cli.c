@@ -9,7 +9,7 @@
 	this code exit on memory fail. it also fundemntaly uses global state
 	this is because this is essentially an intepeter for a gced languge...
 
-	we prefer deep cloning here over effishency so that the code can stay simple.
+	we prefer deep cloning here over efficiency so that the code can stay simple.
 
 	duplicate names are handeled by ignoring the old version (it would still show up)
 
@@ -154,7 +154,7 @@ Heap load_from_file(const char* filename){
 
     Heap ans=split_lines_noalloc(file_content,result);
 
-    if(self_alocate_data_t(ans)){
+    if(self_allocate_data_t(ans)){
         printf("file too large!!!\n");
         exit(1);
     }
@@ -224,7 +224,7 @@ int main() {
 
 	    	struct UserHeap* uh=get_heap(tok2);
 	    	if(uh==NULL){
-	    		printf("heap dosent exists\n");
+	    		printf("heap doesn't exists\n");
 	    		continue;
 	    	}
 
@@ -265,7 +265,7 @@ int main() {
 
 	    	struct UserHeap* uh=get_heap(tok2);
 	    	if(uh==NULL){
-	    		printf("heap dosent exists\n");
+	    		printf("heap doesn't exists\n");
 	    		continue;
 	    	}
 
@@ -332,7 +332,7 @@ int main() {
 
 	    	struct UserHeap* uh=get_heap(tok2);
 	    	if(uh==NULL){
-	    		printf("heap dosent exists\n");
+	    		printf("heap doesn't exists\n");
 	    		continue;
 	    	}
 
@@ -349,7 +349,7 @@ int main() {
 
 	    	struct UserHeap* uh=get_heap(tok2);
 	    	if(uh==NULL){
-	    		printf("heap dosent exists\n");
+	    		printf("heap doesn't exists\n");
 	    		continue;
 	    	}
 
@@ -367,12 +367,12 @@ int main() {
 
 	    	struct UserHeap* a=get_heap(tok2);
 	    	if(a==NULL){
-	    		printf("source 1 dosent exist\n");
+	    		printf("source 1 doesn't exist\n");
 	    		continue;
 	    	}
 	    	struct UserHeap* b=get_heap(tok3);
 	    	if(b==NULL){
-	    		printf("source 2 dosent exist\n");
+	    		printf("source 2 doesn't exist\n");
 	    		continue;
 	    	}
 
@@ -441,7 +441,7 @@ int main() {
 
 	    	struct UserHeap* uh=get_heap(tok2);
 	    	if(uh==NULL){
-	    		printf("heap dosent exists\n");
+	    		printf("heap doesn't exists\n");
 	    		continue;
 	    	}
 
@@ -538,7 +538,7 @@ int main() {
 	    	continue;
 
 	    memory_error:
-	    	printf("could not alocate memory\n");
+	    	printf("could not allocate memory\n");
 	    	return 1;
 
 	}
