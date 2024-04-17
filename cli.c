@@ -154,10 +154,14 @@ Heap load_from_file(const char* filename){
 
     Heap ans=split_lines_noalloc(file_content,result);
 
+
     if(self_allocate_data_t(ans)){
         printf("file too large!!!\n");
         exit(1);
     }
+
+    free(file_content);
+    file_content=NULL;
 
     return ans;
 }
@@ -185,6 +189,15 @@ void print_help(){
 	printf("  exit                  Exits the program.\n");
 	printf("\n");
 
+}
+
+void free_all(){
+	struct HeapList* next;
+	while(Heaps){
+		next=Heaps->next;
+		freeHeapNode(Heaps);
+		Heaps=next;
+	}
 }
 
 int main() {
@@ -489,6 +502,8 @@ int main() {
 	    	}
 
 	    	show_result_node();
+	    	free(data1);
+	    	data1=NULL;
 	    	continue;
 
 	    }
