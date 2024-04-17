@@ -465,8 +465,8 @@ Heap* get_end_ref(Heap x,int size){
 
 //O(nlog(n))
 void inplace_sort(Heap *h){
-	if(*h==NULL){
-		return;
+	if(*h==NULL){//O(1)
+		return;//O(1)
 	}
 	//1<=step<=2n => O(step)=O(n) O(1/step)=O(1)
 	int step=1;//O(1)
@@ -479,6 +479,10 @@ void inplace_sort(Heap *h){
 	Heap a=*h;//O(1)
 	Heap end_a=get_end(a,step);//O(1)
 	Heap b=end_a;//O(1)
+
+	if(end_a==NULL){//O(1)
+		return;//O(1)
+	}
 
 	Heap* end_b_ref=get_end_ref(b,step); //passed by reference so we can update the tail cheaper //O(1)
 	Heap  end_b=*end_b_ref;//O(1)
