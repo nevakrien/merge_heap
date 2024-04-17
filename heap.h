@@ -491,6 +491,7 @@ void inplace_sort(Heap *h){
 
 		step*=2;//log2(n)*O(1)
 
+		//get the first 2 sublists of the array
 		cur_tail=h;//log2(n)*O(1)
 		a=*h;//log2(n)*O(1)
 		end_a=get_end(a,step);//log2(n)*O(step)
@@ -512,6 +513,7 @@ sort_for_step:
 		goto merge_heaps;//O(n)=(n/2step)*O(step+step) 
 		end_merge_heaps:
 
+		//get the next sublist
 		a=end_b;//(n/2step)*O(1)=O(n)
 		end_a=get_end(a,step);//(n/2step)*O(1)=O(n)
 		if(end_a==NULL){//(n/2step)*O(1)=O(n)
@@ -532,7 +534,7 @@ sort_for_step:
 //O(a+b)
 merge_heaps:
 	//this block reorders *cur_tail->a..->b->end_b 	
-	//to *cur_tail->c0..->cn>end_b
+	//to *cur_tail->c0..->cn->end_b
 	//it also updates the cur_tail to point where the current tail is
 	
 	//loops untill the a or b sublist is empty (ie a==end_a or b==end_b)

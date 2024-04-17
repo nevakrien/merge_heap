@@ -10,7 +10,7 @@ int main() {
 
 
     long int result = load_file_to_memory(filename, &file_content);
-    if (result == -1) {
+    if (result<0) {
         free(file_content);
         return 1;
     }

@@ -12,8 +12,14 @@ int main(int argc, char *argv[]) {
     char *file_content;
     long int result = load_file_to_memory(argv[1], &file_content);
     if (result == -1) {
+        perror("Error opening file\n");
         return 1;
     }
+
+    if(result<0){
+        return 1;
+    }
+    
     Heap ans=split_lines_noalloc(file_content,result);
     inplace_sort(&ans);
 
