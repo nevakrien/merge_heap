@@ -1,4 +1,6 @@
 !/precompiled/
+!/precompiled/windows/**/*.exe
+!/precompiled/windows/**/*.pdb
 
 # Prerequisites
 *.d
