@@ -83,7 +83,7 @@ void addHeap(Heap h,bool sorted,char* name){
 	size_t l=strlen(name)+1;
 	struct HeapList* to_add=malloc(sizeof(struct HeapList)+l);
 	if(to_add==NULL){
-		printf("ran out of memory\n");
+		//printf("ran out of memory\n");
 		exit(1);
 	}
 	to_add->self.h=h;
@@ -142,14 +142,16 @@ Heap load_from_file(const char* filename){
 	char* file_content;
 
 	long int result = load_file_to_memory(filename, &file_content);
-    if(result==-1){
-    	perror("Error opening file\n");
-    	return &ERROR_NODE;
-    }
+    
     if (result == -2) {
         //free(file_content);
         printf("file too large!!!\n");
         exit(1);
+    }
+
+    if(result<0){
+    	//some processing issue it would tell us
+    	return &ERROR_NODE;
     }
 
     Heap ans=split_lines_noalloc(file_content,result);

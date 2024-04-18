@@ -17,3 +17,9 @@ other than that fairly unremarkable
 `heap.h` encompasses the full implementations of all algorithms specified in the assignment, complete with analysis and optimizations.
 
 Beyond these elements, the project is fairly straightforward.
+
+
+
+### warnings
+$ gcc -g3 -fsanitize=address,undefined fast_length_sort.c 
+would warn about leaks these are on purpose there is no need to store data

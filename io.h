@@ -22,7 +22,7 @@ void print_data(data_t x){printf("%s",x);}
 long int load_file_to_memory(const char *filename, char **ans) {
     FILE *file = fopen(filename, "rb");
     if (file == NULL) {
-        //perror("Error opening file\n");
+        perror("Error opening file\n");
         return -1;
     }
 
@@ -50,7 +50,7 @@ long int load_file_to_memory(const char *filename, char **ans) {
     if (*ans == NULL) {
         fclose(file);
         fputs("Memory allocation failed\n", stderr);
-        return -1;
+        return -2;
     }
 
     // Read the file from the beginning
@@ -60,7 +60,7 @@ long int load_file_to_memory(const char *filename, char **ans) {
         free(*ans);
         fclose(file);
         fputs("Error reading file\n", stderr);
-        return -1;
+        return -3;
     }
 
     // Set the null terminator if needed
